@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#071a2b">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.svg">
+<title>Proyección Iglesia</title>
+<style>
+:root{--bg:#eef3f7;--card:#fff;--ink:#14202b;--muted:#667789;--navy:#071a2b;--blue:#0969ad;--gold:#e7b33d;--line:#d9e2ea}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+button,input,textarea,select{font:inherit}button{min-height:48px;border:0;border-radius:12px;padding:10px 14px;cursor:pointer}
+.app{min-height:100vh}.top{position:sticky;top:0;z-index:10;background:var(--navy);color:#fff;padding:14px max(14px,env(safe-area-inset-left));display:flex;align-items:center;justify-content:space-between;gap:10px}.brand{font-weight:800;font-size:20px}.sub{font-size:11px;opacity:.7}.top button{background:#18344c;color:#fff}
+.wrap{max-width:1050px;margin:auto;padding:14px}.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}.tabs button{background:#fff;border:1px solid var(--line);color:var(--ink);font-weight:700}.tabs button.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.panel{display:none}.panel.active{display:block}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:15px;box-shadow:0 2px 8px #00000008}.card h2,.card h3{margin:0 0 10px}.muted{color:var(--muted);font-size:13px}.search{width:100%;border:1px solid var(--line);border-radius:12px;padding:13px;background:#fff}.list{display:grid;gap:8px;margin-top:10px}.item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px;border:1px solid var(--line);border-radius:12px;background:#fff}.item button{background:#eaf4fb;color:#075b93;font-weight:700}
+.preview{min-height:260px;border-radius:16px;background:#071a2b;color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;padding:25px}.preview .content{font-size:clamp(28px,6vw,58px);font-weight:700;line-height:1.2;white-space:pre-wrap}.controls{display:grid;grid-template-columns:1fr 1.5fr 1fr;gap:8px;margin-top:10px}.prev{background:#edf1f4}.project{background:var(--blue);color:#fff;font-weight:800;font-size:18px}.next{background:#edf1f4}
+textarea{width:100%;min-height:110px;border:1px solid var(--line);border-radius:12px;padding:12px;resize:vertical}.row{display:flex;gap:8px;flex-wrap:wrap}.primary{background:var(--blue);color:#fff;font-weight:700}.danger{background:#feecec;color:#a21c1c}.gold{background:#fff5d8;color:#725300;font-weight:700}
+.culto{display:grid;gap:8px}.culto .item{cursor:pointer}.small{font-size:12px}
+.empty{text-align:center;padding:25px;color:var(--muted)}
+.modal{position:fixed;inset:0;background:#0008;display:none;z-index:100;padding:20px;align-items:center;justify-content:center}.modal.open{display:flex}.modalbox{width:min(900px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:18px;padding:18px}
+.projection{position:fixed;inset:0;background:#000;color:#fff;z-index:200;display:none;align-items:center;justify-content:center;text-align:center;padding:7vw}.projection.open{display:flex}.projectionText{font-size:clamp(34px,8vw,96px);font-weight:800;line-height:1.15;white-space:pre-wrap}.closeProj{position:fixed;top:16px;right:16px;background:#ffffff22;color:#fff}
+@media(max-width:700px){.grid{grid-template-columns:1fr}.tabs{grid-template-columns:repeat(2,1fr)}.controls{grid-template-columns:1fr 1.3fr 1fr}.wrap{padding:10px}.top{padding-top:max(12px,env(safe-area-inset-top))}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top">
+  <div><div class="brand">📽️ Proyección Iglesia</div><div class="sub">Canciones · Biblia · Culto · Proyección</div></div>
+  <button onclick="openProjection()">🖥️ Proyectar</button>
+</header>
+
+<main class="wrap">
+<nav class="tabs">
+<button class="active" onclick="tab('songs',this)">🎵 Canciones</button>
+<button onclick="tab('bible',this)">📖 Biblia</button>
+<button onclick="tab('service',this)">📋 Culto</button>
+<button onclick="tab('slides',this)">📝 Diapositivas</button>
+</nav>
+
+<section id="songs" class="panel active">
+<div class="grid">
+<div class="card"><h2>Canciones</h2><input class="search" id="songSearch" placeholder="Buscar canción..." oninput="renderSongs()"><div id="songList" class="list"></div></div>
+<div class="card"><h2>Editor</h2><input class="search" id="songTitle" placeholder="Título de la canción"><br><br><textarea id="songText" placeholder="Escribe cada estrofa o parte de la canción. Usa líneas en blanco para separar diapositivas."></textarea><br><br><div class="row"><button class="primary" onclick="saveSong()">💾 Guardar</button><button class="danger" onclick="deleteSong()">Eliminar</button></div><p class="muted">Las canciones se guardan en este dispositivo.</p></div>
+</div>
+</section>
+
+<section id="bible" class="panel">
+<div class="grid">
+<div class="card"><h2>Biblia</h2><input class="search" id="bibleRef" placeholder="Ej.: Juan 3:16"><br><br><button class="primary" onclick="loadBible()">📖 Preparar pasaje</button><div id="bibleList" class="list"></div><p class="muted">Esta primera versión incluye pasajes de demostración. Después podemos integrar una base bíblica con la licencia correspondiente.</p></div>
+<div class="card"><h2>Vista previa</h2><div class="preview"><div id="biblePreview" class="content">Selecciona un pasaje.</div></div><div class="controls"><button class="prev" onclick="previous()">◀</button><button class="project" onclick="openProjection()">PROYECTAR</button><button class="next" onclick="next()">▶</button></div></div>
+</div>
+</section>
+
+<section id="service" class="panel">
+<div class="card"><h2>Orden del culto</h2><p class="muted">Agrega canciones, pasajes o diapositivas y avanza durante el culto.</p><div class="row"><button class="primary" onclick="addCurrent()">➕ Agregar elemento actual</button><button class="gold" onclick="clearService()">Limpiar orden</button></div><div id="serviceList" class="culto" style="margin-top:12px"></div></div>
+</section>
+
+<section id="slides" class="panel">
+<div class="grid">
+<div class="card"><h2>Diapositiva</h2><input class="search" id="slideTitle" placeholder="Título"><br><br><textarea id="slideText" placeholder="Texto que quieres proyectar"></textarea><br><br><button class="primary" onclick="saveSlide()">💾 Guardar diapositiva</button></div>
+<div class="card"><h2>Mis diapositivas</h2><div id="slideList" class="list"></div></div>
+</div>
+</section>
+</main>
+</div>
+
+<div id="projection" class="projection">
+<button class="closeProj" onclick="closeProjection()">✕ Cerrar</button>
+<div id="projectionText" class="projectionText"></div>
+</div>
+
+<script>
+const KEY='PROYECCION_IGLESIA_V1';
+let db=JSON.parse(localStorage.getItem(KEY)||'null')||{
+songs:[
+{title:'Grande es tu fidelidad',text:'Grande es tu fidelidad\\nGrande es tu fidelidad\\nCada mañana me haces despertar\\nGrande es tu fidelidad'},
+{title:'Ejemplo — Canción nueva',text:'Escribe aquí la letra de tu canción\\n\\nCORO\\nEscribe aquí el coro'}
+],
+slides:[{title:'Bienvenidos',text:'Bienvenidos a nuestro culto\\nDios les bendiga'}],
+service:[], current:{type:'slide',title:'Bienvenidos',text:'Bienvenidos a nuestro culto\\nDios les bendiga'}, index:0
+};
+function persist(){localStorage.setItem(KEY,JSON.stringify(db))}
+function tab(id,btn){document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('active'));btn.classList.add('active');if(id==='songs')renderSongs();if(id==='slides')renderSlides();if(id==='service')renderService()}
+function renderSongs(){let q=(document.getElementById('songSearch').value||'').toLowerCase();let el=document.getElementById('songList');el.innerHTML='';db.songs.filter(s=>s.title.toLowerCase().includes(q)).forEach((s,i)=>{let d=document.createElement('div');d.className='item';d.innerHTML='<span>🎵 '+esc(s.title)+'</span><button onclick="selectSong('+i+')">Abrir</button>';el.appendChild(d)})}
+function selectSong(i){let s=db.songs[i];db.current={type:'song',title:s.title,text:s.text,index:0};document.getElementById('songTitle').value=s.title;document.getElementById('songText').value=s.text;showCurrent();persist()}
+function saveSong(){let title=document.getElementById('songTitle').value.trim(),text=document.getElementById('songText').value.trim();if(!title||!text)return alert('Escribe el título y la letra.');let i=db.songs.findIndex(x=>x.title===title);if(i>=0)db.songs[i]={title,text};else db.songs.push({title,text});db.current={type:'song',title,text,index:0};persist();renderSongs();showCurrent()}
+function deleteSong(){let title=document.getElementById('songTitle').value.trim();let i=db.songs.findIndex(x=>x.title===title);if(i<0)return;db.songs.splice(i,1);document.getElementById('songTitle').value='';document.getElementById('songText').value='';persist();renderSongs()}
+function loadBible(){let ref=document.getElementById('bibleRef').value.trim();let examples={'juan 3:16':'Porque de tal manera amó Dios al mundo, que ha dado a su Hijo unigénito, para que todo aquel que en él cree, no se pierda, mas tenga vida eterna.','salmo 23:1':'Jehová es mi pastor; nada me faltará.','efesios 2:13':'Pero ahora en Cristo Jesús, vosotros que en otro tiempo estabais lejos, habéis sido hechos cercanos por la sangre de Cristo.','efesios 2:18':'porque por medio de él los unos y los otros tenemos entrada por un mismo Espíritu al Padre.'};let text=examples[ref.toLowerCase()]||'Pasaje preparado: '+ref+'\\n\\nAquí aparecerá el texto bíblico cuando integremos la base bíblica correspondiente.';db.current={type:'bible',title:ref,text,index:0};document.getElementById('biblePreview').textContent=text;document.getElementById('bibleList').innerHTML='<div class="item"><span>📖 '+esc(ref)+'</span><button onclick="openProjection()">Proyectar</button></div>';persist()}
+function saveSlide(){let title=document.getElementById('slideTitle').value.trim(),text=document.getElementById('slideText').value.trim();if(!title||!text)return alert('Completa título y texto.');db.slides.push({title,text});db.current={type:'slide',title,text,index:0};persist();renderSlides();showCurrent()}
+function renderSlides(){let el=document.getElementById('slideList');el.innerHTML='';db.slides.forEach((s,i)=>{let d=document.createElement('div');d.className='item';d.innerHTML='<span>📝 '+esc(s.title)+'</span><button onclick="selectSlide('+i+')">Abrir</button>';el.appendChild(d)})}
+function selectSlide(i){let s=db.slides[i];db.current={type:'slide',title:s.title,text:s.text,index:0};showCurrent();persist()}
+function splitCurrent(){return String(db.current.text||'').split(/\n\s*\n/).filter(x=>x.trim())}
+function showCurrent(){let parts=splitCurrent();let idx=Math.max(0,Math.min(db.current.index||0,parts.length-1));db.current.index=idx;let text=parts[idx]||db.current.text||'';document.getElementById('biblePreview').textContent=text;persist()}
+function next(){let p=splitCurrent();if(db.current.index<p.length-1){db.current.index++;showCurrent()}else{let n=db.service.indexOf(db.current);if(n>=0&&n<db.service.length-1){db.current={...db.service[n+1],index:0};showCurrent();}}}
+function previous(){if(db.current.index>0){db.current.index--;showCurrent()}}
+function openProjection(){document.getElementById('projectionText').textContent=splitCurrent()[db.current.index||0]||db.current.text||'';document.getElementById('projection').classList.add('open')}
+function closeProjection(){document.getElementById('projection').classList.remove('open')}
+function addCurrent(){db.service.push({type:db.current.type,title:db.current.title,text:db.current.text});persist();renderService()}
+function renderService(){let el=document.getElementById('serviceList');el.innerHTML='';if(!db.service.length){el.innerHTML='<div class="empty">Todavía no hay elementos en el culto.</div>';return}db.service.forEach((s,i)=>{let d=document.createElement('div');d.className='item';d.innerHTML='<span><b>'+(i+1)+'.</b> '+esc(s.title)+'</span><button onclick="useService('+i+')">Usar</button>';el.appendChild(d)})}
+function useService(i){db.current={...db.service[i],index:0};showCurrent()}
+function clearService(){if(confirm('¿Limpiar el orden del culto?')){db.service=[];persist();renderService()}}
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+renderSongs();renderSlides();renderService();showCurrent();
+</script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));}</script>
+</body>
+</html>
