@@ -65,13 +65,14 @@ textarea{width:100%;min-height:110px;border:1px solid var(--line);border-radius:
 </main>
 </div>
 
+<div id="slidePreview" class="modal"><div class="modalbox"><div class="row" style="justify-content:space-between;align-items:center"><h2 id="slidePreviewTitle" style="margin:0">Vista previa</h2><button class="danger" onclick="closeSlidePreview()">Cerrar</button></div><div class="preview" style="margin-top:12px"><div id="slidePreviewText" class="content"></div></div><div class="controls"><button class="prev" onclick="previous();updateSlidePreview()">◀</button><button class="project" onclick="closeSlidePreview();openProjection()">PROYECTAR</button><button class="next" onclick="next();updateSlidePreview()">▶</button></div></div></div>
 <div id="projection" class="projection">
 <button class="closeProj" onclick="closeProjection()">✕ Cerrar</button>
 <div id="projectionText" class="projectionText"></div>
 </div>
 
 <script>
-const KEY='PROYECCION_IGLESIA_V1';
+const KEY='PROYECCION_IGLESIA_V2';
 let db=JSON.parse(localStorage.getItem(KEY)||'null')||{
 songs:[
 {title:'Grande es tu fidelidad',text:'Grande es tu fidelidad\\nGrande es tu fidelidad\\nCada mañana me haces despertar\\nGrande es tu fidelidad'},
@@ -83,14 +84,18 @@ service:[], current:{type:'slide',title:'Bienvenidos',text:'Bienvenidos a nuestr
 function persist(){localStorage.setItem(KEY,JSON.stringify(db))}
 function tab(id,btn){document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('active'));btn.classList.add('active');if(id==='songs')renderSongs();if(id==='slides')renderSlides();if(id==='service')renderService()}
 function renderSongs(){let q=(document.getElementById('songSearch').value||'').toLowerCase();let el=document.getElementById('songList');el.innerHTML='';db.songs.filter(s=>s.title.toLowerCase().includes(q)).forEach((s,i)=>{let d=document.createElement('div');d.className='item';d.innerHTML='<span>🎵 '+esc(s.title)+'</span><button onclick="selectSong('+i+')">Abrir</button>';el.appendChild(d)})}
-function selectSong(i){let s=db.songs[i];db.current={type:'song',title:s.title,text:s.text,index:0};document.getElementById('songTitle').value=s.title;document.getElementById('songText').value=s.text;showCurrent();persist()}
-function saveSong(){let title=document.getElementById('songTitle').value.trim(),text=document.getElementById('songText').value.trim();if(!title||!text)return alert('Escribe el título y la letra.');let i=db.songs.findIndex(x=>x.title===title);if(i>=0)db.songs[i]={title,text};else db.songs.push({title,text});db.current={type:'song',title,text,index:0};persist();renderSongs();showCurrent()}
+function normalizeText(t){return String(t||'').replace(/\[n\]/g,'\n').replace(/\r\n/g,'\n').replace(/\r/g,'\n').trim()}
+function selectSong(i){let s=db.songs[i];s.text=normalizeText(s.text);db.current={type:'song',title:s.title,text:s.text,index:0};document.getElementById('songTitle').value=s.title;document.getElementById('songText').value=s.text;showCurrent();persist()}
+function saveSong(){let title=document.getElementById('songTitle').value.trim(),text=normalizeText(document.getElementById('songText').value);if(!title||!text)return alert('Escribe el título y la letra.');let i=db.songs.findIndex(x=>x.title===title);if(i>=0)db.songs[i]={title,text};else db.songs.push({title,text});db.current={type:'song',title,text,index:0};persist();renderSongs();showCurrent()}
 function deleteSong(){let title=document.getElementById('songTitle').value.trim();let i=db.songs.findIndex(x=>x.title===title);if(i<0)return;db.songs.splice(i,1);document.getElementById('songTitle').value='';document.getElementById('songText').value='';persist();renderSongs()}
 function loadBible(){let ref=document.getElementById('bibleRef').value.trim();let examples={'juan 3:16':'Porque de tal manera amó Dios al mundo, que ha dado a su Hijo unigénito, para que todo aquel que en él cree, no se pierda, mas tenga vida eterna.','salmo 23:1':'Jehová es mi pastor; nada me faltará.','efesios 2:13':'Pero ahora en Cristo Jesús, vosotros que en otro tiempo estabais lejos, habéis sido hechos cercanos por la sangre de Cristo.','efesios 2:18':'porque por medio de él los unos y los otros tenemos entrada por un mismo Espíritu al Padre.'};let text=examples[ref.toLowerCase()]||'Pasaje preparado: '+ref+'\\n\\nAquí aparecerá el texto bíblico cuando integremos la base bíblica correspondiente.';db.current={type:'bible',title:ref,text,index:0};document.getElementById('biblePreview').textContent=text;document.getElementById('bibleList').innerHTML='<div class="item"><span>📖 '+esc(ref)+'</span><button onclick="openProjection()">Proyectar</button></div>';persist()}
-function saveSlide(){let title=document.getElementById('slideTitle').value.trim(),text=document.getElementById('slideText').value.trim();if(!title||!text)return alert('Completa título y texto.');db.slides.push({title,text});db.current={type:'slide',title,text,index:0};persist();renderSlides();showCurrent()}
-function renderSlides(){let el=document.getElementById('slideList');el.innerHTML='';db.slides.forEach((s,i)=>{let d=document.createElement('div');d.className='item';d.innerHTML='<span>📝 '+esc(s.title)+'</span><button onclick="selectSlide('+i+')">Abrir</button>';el.appendChild(d)})}
-function selectSlide(i){let s=db.slides[i];db.current={type:'slide',title:s.title,text:s.text,index:0};showCurrent();persist()}
-function splitCurrent(){return String(db.current.text||'').split(/\n\s*\n/).filter(x=>x.trim())}
+function saveSlide(){let title=document.getElementById('slideTitle').value.trim(),text=normalizeText(document.getElementById('slideText').value);if(!title||!text)return alert('Completa título y texto.');db.slides.push({title,text});db.current={type:'slide',title,text,index:0};persist();renderSlides();showCurrent()}
+function renderSlides(){let el=document.getElementById('slideList');el.innerHTML='';db.slides.forEach((s,i)=>{let d=document.createElement('div');d.className='item';d.innerHTML='<span>📝 '+esc(s.title)+'</span><button onclick="openSlide('+i+')">Abrir</button>';el.appendChild(d)})}
+function selectSlide(i){let s=db.slides[i];db.current={type:'slide',title:s.title,text:normalizeText(s.text),index:0};showCurrent();persist()}
+function openSlide(i){let s=db.slides[i];db.current={type:'slide',title:s.title,text:normalizeText(s.text),index:0};showCurrent();document.getElementById('slidePreviewTitle').textContent=s.title;updateSlidePreview();document.getElementById('slidePreview').classList.add('open');persist()}
+function closeSlidePreview(){document.getElementById('slidePreview').classList.remove('open')}
+function updateSlidePreview(){document.getElementById('slidePreviewText').textContent=splitCurrent()[db.current.index||0]||db.current.text||''}
+function splitCurrent(){let t=normalizeText(db.current.text);if(!t)return [''];let p=t.split(/\n\s*\n/).filter(x=>x.trim());return p.length?p:[t]}
 function showCurrent(){let parts=splitCurrent();let idx=Math.max(0,Math.min(db.current.index||0,parts.length-1));db.current.index=idx;let text=parts[idx]||db.current.text||'';document.getElementById('biblePreview').textContent=text;persist()}
 function next(){let p=splitCurrent();if(db.current.index<p.length-1){db.current.index++;showCurrent()}else{let n=db.service.indexOf(db.current);if(n>=0&&n<db.service.length-1){db.current={...db.service[n+1],index:0};showCurrent();}}}
 function previous(){if(db.current.index>0){db.current.index--;showCurrent()}}
