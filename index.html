@@ -82,6 +82,15 @@ slides:[{title:'Bienvenidos',text:'Bienvenidos a nuestro culto\\nDios les bendig
 service:[], current:{type:'slide',title:'Bienvenidos',text:'Bienvenidos a nuestro culto\\nDios les bendiga'}, index:0
 };
 function persist(){localStorage.setItem(KEY,JSON.stringify(db))}
+function migrateLegacyData(){
+  const demo=db.songs.find(s=>s.title==='Grande es tu fidelidad');
+  if(demo && (!demo.text.includes('\n') || /Grande es tu fidelidadGrande/.test(demo.text))){
+    demo.text='Grande es tu fidelidad\nGrande es tu fidelidad\n\nCada mañana me haces despertar\nGrande es tu fidelidad';
+  }
+  db.songs.forEach(s=>{ s.text=normalizeText(s.text); });
+  persist();
+}
+
 function tab(id,btn){document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('active'));btn.classList.add('active');if(id==='songs')renderSongs();if(id==='slides')renderSlides();if(id==='service')renderService()}
 function renderSongs(){let q=(document.getElementById('songSearch').value||'').toLowerCase();let el=document.getElementById('songList');el.innerHTML='';db.songs.filter(s=>s.title.toLowerCase().includes(q)).forEach((s,i)=>{let d=document.createElement('div');d.className='item';d.innerHTML='<span>🎵 '+esc(s.title)+'</span><button onclick="selectSong('+i+')">Abrir</button>';el.appendChild(d)})}
 function normalizeText(t){return String(t||'').replace(/\[n\]/g,'\n').replace(/\\n/g,'\n').replace(/\r\n/g,'\n').replace(/\r/g,'\n').trim()}
@@ -106,7 +115,7 @@ function renderService(){let el=document.getElementById('serviceList');el.innerH
 function useService(i){db.current={...db.service[i],index:0};showCurrent()}
 function clearService(){if(confirm('¿Limpiar el orden del culto?')){db.service=[];persist();renderService()}}
 function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-renderSongs();renderSlides();renderService();showCurrent();
+migrateLegacyData();renderSongs();renderSlides();renderService();showCurrent();
 </script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));}</script>
 </body>
