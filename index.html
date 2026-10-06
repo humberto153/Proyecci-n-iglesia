@@ -68,7 +68,10 @@ textarea{width:100%;min-height:110px;border:1px solid var(--line);border-radius:
 <div id="slidePreview" class="modal"><div class="modalbox"><div class="row" style="justify-content:space-between;align-items:center"><h2 id="slidePreviewTitle" style="margin:0">Vista previa</h2><button class="danger" onclick="closeSlidePreview()">Cerrar</button></div><div class="preview" style="margin-top:12px"><div id="slidePreviewText" class="content"></div></div><div class="controls"><button class="prev" onclick="previous();updateSlidePreview()">◀</button><button class="project" onclick="closeSlidePreview();openProjection()">PROYECTAR</button><button class="next" onclick="next();updateSlidePreview()">▶</button></div></div></div>
 <div id="projection" class="projection">
 <button class="closeProj" onclick="closeProjection()">✕ Cerrar</button>
-<div id="projectionText" class="projectionText"></div>
+<div id="projectionText" class="projectionText"></<div class="controls" style="position:fixed;bottom:20px;left:0;right:0;justify-content:center">
+<button onclick="previous();openProjection()">◀ Anterior</button>
+<button onclick="next();openProjection()">Siguiente ▶</button>
+</div> 
 </div>
 
 <script>
