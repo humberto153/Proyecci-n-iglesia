@@ -19,7 +19,7 @@ textarea{width:100%;min-height:110px;border:1px solid var(--line);border-radius:
 .culto{display:grid;gap:8px}.culto .item{cursor:pointer}.small{font-size:12px}label{display:block;font-size:13px;font-weight:700;margin:0 0 6px;color:var(--muted)}select.search{color:var(--ink)}hr{border:0;border-top:1px solid var(--line)}
 .empty{text-align:center;padding:25px;color:var(--muted)}
 .modal{position:fixed;inset:0;background:#0008;display:none;z-index:100;padding:20px;align-items:center;justify-content:center}.modal.open{display:flex}.modalbox{width:min(900px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:18px;padding:18px}
-.projection{position:fixed;inset:0;background:#000;color:#fff;z-index:200;display:none;align-items:center;justify-content:center;text-align:center;padding:7vw}.projection.open{display:flex}.projectionText{font-size:clamp(34px,8vw,96px);font-weight:800;line-height:1.15;white-space:pre-wrap}.closeProj{position:fixed;top:16px;right:16px;background:#ffffff22;color:#fff}
+.projection{position:fixed;inset:0;background:var(--proj-bg,#000);color:var(--proj-fg,#fff);z-index:200;display:none;align-items:center;justify-content:center;text-align:center;padding:8vh 7vw 12vh;transition:background .2s,color .2s}.projection.open{display:flex}.projectionText{font-size:var(--proj-size,clamp(34px,8vw,96px));font-weight:800;line-height:1.18;white-space:pre-wrap;max-width:100%;max-height:100%;overflow:auto;overflow-wrap:anywhere}.closeProj{position:fixed;top:12px;right:12px;background:#ffffff22;color:inherit;z-index:2}.projectionTools{position:fixed;left:12px;right:12px;bottom:12px;display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;z-index:2}.projectionTools button{background:#ffffffed;color:#14202b;min-height:42px;font-weight:700}.projectionTools .themeButton{background:#18344c;color:#fff}.projection[data-theme="blue"]{--proj-bg:#071a2b;--proj-fg:#fff}.projection[data-theme="light"]{--proj-bg:#fff;--proj-fg:#14202b}.projection[data-theme="black"]{--proj-bg:#000;--proj-fg:#fff}
 @media(max-width:700px){.grid{grid-template-columns:1fr}.tabs{grid-template-columns:repeat(2,1fr)}.controls{grid-template-columns:1fr 1.3fr 1fr}.wrap{padding:10px}.top{padding-top:max(12px,env(safe-area-inset-top))}}
 </style>
 </head>
@@ -69,7 +69,10 @@ textarea{width:100%;min-height:110px;border:1px solid var(--line);border-radius:
 <div id="projection" class="projection">
 <button class="closeProj" onclick="closeProjection()">✕ Cerrar</button>
 <div id="projectionText" class="projectionText"></div>
-<div class="controls" style="position:fixed;bottom:20px;left:0;right:0;justify-content:center">
+<div class="projectionTools" aria-label="Controles de proyección">
+<button onclick="changeProjectionSize(-1)" aria-label="Disminuir letra">A−</button>
+<button onclick="changeProjectionSize(1)" aria-label="Aumentar letra">A+</button>
+<button class="themeButton" onclick="cycleProjectionTheme()">🎨 Fondo</button>
 <button onclick="previous();openProjection()">◀ Anterior</button>
 <button onclick="next();openProjection()">Siguiente ▶</button>
 </div>
@@ -127,7 +130,11 @@ function splitCurrent(){let t=normalizeText(db.current.text);if(!t)return [''];l
 function showCurrent(){let parts=splitCurrent();let idx=Math.max(0,Math.min(db.current.index||0,parts.length-1));db.current.index=idx;let text=parts[idx]||db.current.text||'';document.getElementById('biblePreview').textContent=text;persist()}
 function next(){let p=splitCurrent();if(db.current.index<p.length-1){db.current.index++;showCurrent()}else{let n=db.service.indexOf(db.current);if(n>=0&&n<db.service.length-1){db.current={...db.service[n+1],index:0};showCurrent();}}}
 function previous(){if(db.current.index>0){db.current.index--;showCurrent()}}
-function openProjection(){document.getElementById('projectionText').textContent=splitCurrent()[db.current.index||0]||db.current.text||'';document.getElementById('projection').classList.add('open')}
+let projectionFontSize=72;let projectionThemes=['black','blue','light'];let projectionThemeIndex=0;
+function applyProjectionStyle(){const el=document.getElementById('projection');el.dataset.theme=projectionThemes[projectionThemeIndex];document.getElementById('projectionText').style.fontSize=projectionFontSize+'px'}
+function changeProjectionSize(delta){projectionFontSize=Math.max(28,Math.min(120,projectionFontSize+delta*6));applyProjectionStyle()}
+function cycleProjectionTheme(){projectionThemeIndex=(projectionThemeIndex+1)%projectionThemes.length;applyProjectionStyle()}
+function openProjection(){document.getElementById('projectionText').textContent=splitCurrent()[db.current.index||0]||db.current.text||'';applyProjectionStyle();document.getElementById('projection').classList.add('open')}
 function closeProjection(){document.getElementById('projection').classList.remove('open')}
 function addCurrent(){db.service.push({type:db.current.type,title:db.current.title,text:db.current.text});persist();renderService()}
 function renderService(){let el=document.getElementById('serviceList');el.innerHTML='';if(!db.service.length){el.innerHTML='<div class="empty">Todavía no hay elementos en el culto.</div>';return}db.service.forEach((s,i)=>{let d=document.createElement('div');d.className='item';d.innerHTML='<span><b>'+(i+1)+'.</b> '+esc(s.title)+'</span><button onclick="useService('+i+')">Usar</button>';el.appendChild(d)})}
