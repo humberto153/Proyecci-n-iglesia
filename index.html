@@ -78,6 +78,42 @@ textarea{width:100%;min-height:110px;border:1px solid var(--line);border-radius:
 </div>
 </div>
 <script>
+  (function(){
+  const p=document.getElementById('projection');
+    p.querySelector('.projectionTools').style.display='none';
+p.querySelector('.closeProj').style.display='none';
+  let sx=0,sy=0,t0=0,lastTap=0;
+
+  p.addEventListener('touchstart',e=>{
+    const t=e.changedTouches[0];
+    sx=t.clientX;
+    sy=t.clientY;
+    t0=Date.now();
+  },{passive:true});
+
+  p.addEventListener('touchend',e=>{
+    const t=e.changedTouches[0];
+    const dx=t.clientX-sx;
+    const dy=t.clientY-sy;
+    const dt=Date.now()-t0;
+
+    if(Math.abs(dx)>60 && Math.abs(dx)>Math.abs(dy)){
+      if(dx<0){next();}else{previous();}
+      openProjection();
+      return;
+    }
+
+    if(Math.abs(dx)<20 && Math.abs(dy)<20 && dt<350){
+      const now=Date.now();
+      if(now-lastTap<400){
+        closeProjection();
+        lastTap=0;
+      }else{
+        lastTap=now;
+      }
+    }
+  },{passive:true});
+})();
 const KEY='PROYECCION_IGLESIA_V8';
 let db=JSON.parse(localStorage.getItem(KEY)||'null')||{
 songs:[
