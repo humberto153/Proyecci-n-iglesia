@@ -80,6 +80,8 @@ textarea{width:100%;min-height:110px;border:1px solid var(--line);border-radius:
 <script>
   (function(){
   const p=document.getElementById('projection');
+    p.querySelector('.projectionTools').style.display='none';
+    p.querySelector('.closeProj').style.display='none';
   let sx=0,sy=0,t0=0,lastTap=0;
   p.addEventListener('touchstart',e=>{
     const t=e.changedTouches[0];
