@@ -163,7 +163,7 @@ function closeSlidePreview(){document.getElementById('slidePreview').classList.r
 function updateSlidePreview(){document.getElementById('slidePreviewText').textContent=splitCurrent()[db.current.index||0]||db.current.text||''}
 function splitCurrent(){let t=normalizeText(db.current.text);if(!t)return [''];let p=t.split(/\n\s*\n/).filter(x=>x.trim());return p.length?p:[t]}
 function showCurrent(){let parts=splitCurrent();let idx=Math.max(0,Math.min(db.current.index||0,parts.length-1));db.current.index=idx;let text=parts[idx]||db.current.text||'';document.getElementById('biblePreview').textContent=text;persist()}
-function next(){let p=splitCurrent();if(db.current.index<p.length-1){db.current.index++;showCurrent()}else{let n=db.service.indexOf(db.current);if(n>=0&&n<db.service.length-1){db.current={...db.service[n+1],index:0};showCurrent();}}}
+function next(){let p=splitCurrent();if(db.current.index<p.length-1){db.current.index++;showCurrent()}else{let n=db.service.findIndex(s=>s.type===db.current.type&&s.title===db.current.title&&s.text===db.current.text);if(n>=0&&n<db.service.length-1){db.current={...db.service[n+1],index:0};showCurrent();if(document.getElementById('projection').classList.contains('open'))document.getElementById('projectionText').textContent=splitCurrent()[0]||db.current.text||''}}}
 function previous(){if(db.current.index>0){db.current.index--;showCurrent()}}
 let projectionFontSize=72;let projectionThemes=['black','blue','light'];let projectionThemeIndex=0;
 function applyProjectionStyle(){const el=document.getElementById('projection');el.dataset.theme=projectionThemes[projectionThemeIndex];document.getElementById('projectionText').style.fontSize=projectionFontSize+'px'}
