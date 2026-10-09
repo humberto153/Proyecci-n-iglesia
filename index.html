@@ -42,6 +42,12 @@ textarea{width:100%;min-height:110px;border:1px solid var(--line);border-radius:
 <div class="grid">
 <div class="card"><h2>Canciones</h2><input class="search" id="songSearch" placeholder="Buscar canción..." oninput="renderSongs()"><div id="songList" class="list"></div></div>
 <div class="card"><h2>Editor</h2><input class="search" id="songTitle" placeholder="Título de la canción"><br><br><textarea id="songText" placeholder="Escribe cada estrofa o parte de la canción. Usa líneas en blanco para separar diapositivas."></textarea><br><br><div class="row"><button class="primary" onclick="saveSong()">💾 Guardar</button><button class="danger" onclick="deleteSong()">Eliminar</button></div><p class="muted">Las canciones se guardan en este dispositivo.</p></div>
+  
+<div class="card">
+  <h2>Importar canciones</h2>
+  <input type="file" id="songFiles" accept=".txt,text/plain" multiple>
+</div>
+
 </div>
 </section>
 
@@ -178,6 +184,36 @@ function useService(i){const s=db.service[i];if(!s)return;db.current={...s,index
 function clearService(){if(confirm('¿Limpiar el orden del culto?')){db.service=[];persist();renderService()}}
 function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 migrateLegacyData();renderSongs();renderSlides();renderService();showCurrent();initBibleSelectors();
+  
+document.getElementById('songFiles').addEventListener('change', async function(e) {
+  const files = Array.from(e.target.files || []);
+  let added = 0;
+
+  for (const file of files) {
+    const text = await file.text();
+    const title = file.name.replace(/\.txt$/i, '').trim();
+
+    if (!text.trim()) continue;
+
+    const exists = songs.some(s =>
+      s.title.toLowerCase() === title.toLowerCase()
+    );
+
+    if (!exists) {
+      songs.push({
+        title: title,
+        text: text.trim()
+      });
+      added++;
+    }
+  }
+
+  persist();
+  renderSongs();
+  alert('Canciones importadas: ' + added);
+  e.target.value = '';
+});
+
 </script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));}</script>
 </body>
