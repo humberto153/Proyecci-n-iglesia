@@ -192,7 +192,7 @@ document.getElementById('songFiles').addEventListener('change', async function(e
 
   for (const file of files) {
     const text = await file.text();
-    const title = file.name.replace(/\.txt$/i, '').trim();
+    const title = file.name.replace(/\.(txt|md)$/i, '').trim();
 
     if (!text.trim()) continue;
 
