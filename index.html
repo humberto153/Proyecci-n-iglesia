@@ -186,7 +186,7 @@ function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;',
 migrateLegacyData();renderSongs();renderSlides();renderService();showCurrent();initBibleSelectors();
   
 document.getElementById('songFiles').addEventListener('change', async function(e) {
-  alert('El selector de canciones funciona');
+  
   const files = Array.from(e.target.files || []);
   let added = 0;
 
@@ -196,12 +196,12 @@ document.getElementById('songFiles').addEventListener('change', async function(e
 
     if (!text.trim()) continue;
 
-    const exists = songs.some(s =>
+    const exists = db.songs.some(s =>
       s.title.toLowerCase() === title.toLowerCase()
     );
 
     if (!exists) {
-      songs.push({
+     db. songs.push({
         title: title,
         text: text.trim()
       });
