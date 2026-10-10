@@ -221,7 +221,7 @@ document.getElementById('songFiles').addEventListener('change', async function(e
 <h2>🎵 Música</h2>
 <input type="file" id="audioFile" accept=".mp3,.m4a,.wav,.aac,audio/mpeg,audio/mp4,audio/wav"
 
-<audio id="audioPlayer" controls preload="metadata" style="display:block;width:320px;height:60px;background:#eeeeee;"></audio>
+<audio id="audioPlayer" controls playsinline style="width:100%;height:54px;"></audio>
 
 <script>
 document.getElementById('audioFile').addEventListener('change', function() {
