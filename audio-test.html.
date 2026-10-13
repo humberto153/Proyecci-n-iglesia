@@ -1,0 +1,43 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prueba de audio</title>
+</head>
+<body>
+<h2>Prueba de audio — Proyección Iglesia</h2>
+<p>Selecciona un archivo MP3 de tu iPad.</p>
+
+<input id="archivo" type="file" accept="audio/*">
+<p id="estado">Esperando archivo...</p>
+<audio id="reproductor" controls style="width:100%"></audio>
+
+<script>
+const archivo = document.getElementById('archivo');
+const reproductor = document.getElementById('reproductor');
+const estado = document.getElementById('estado');
+
+archivo.addEventListener('change', function () {
+  const file = this.files[0];
+  if (!file) return;
+
+  reproductor.src = URL.createObjectURL(file);
+  reproductor.load();
+
+  estado.textContent = 'Archivo: ' + file.name +
+    ' | Tamaño: ' + file.size + ' bytes';
+
+  reproductor.onloadedmetadata = function () {
+    estado.textContent += ' | Duración: ' +
+      Math.round(reproductor.duration) + ' segundos';
+  };
+
+  reproductor.onerror = function () {
+    estado.textContent += ' | Error al cargar el audio.';
+  };
+});
+</script>
+</body>
+</html>
