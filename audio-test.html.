@@ -10,7 +10,9 @@
 <h2>Prueba de audio — Proyección Iglesia</h2>
 <p>Selecciona un archivo MP3 de tu iPad.</p>
 
-<input id="archivo" type="file" accept="audio/*">
+
+<input id="archivo" type="file" accept=".mp3,audio/mpeg,audio/mp3,audio/*">
+
 <p id="estado">Esperando archivo...</p>
 <audio id="reproductor" controls style="width:100%"></audio>
 
