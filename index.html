@@ -219,7 +219,9 @@ document.getElementById('songFiles').addEventListener('change', async function(e
 <script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));}</script>
 
 <h2>🎵 Música</h2>
-<input type="file" id="audioFile" accept=".mp3,.m4a,.wav,.aac,audio/mpeg,audio/mp4,audio/wav"
+
+<input type="file" id="audioFile" accept=".mp3,.m4a,.wav,.aac,.mp4,audio/*">
+
 
 <audio id="audioPlayer" controls playsinline style="width:100%;height:54px;"></audio>
 
