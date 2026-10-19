@@ -223,7 +223,10 @@ document.getElementById('songFiles').addEventListener('change', async function(e
 <input type="file" id="audioFile" accept=".mp3,.m4a,.wav,.aac,.mp4,audio/*">
 
 
-<audio id="audioPlayer" controls playsinline style="width:100%;height:54px;"></audio>
+<audio id="audioPlayer" controls playsinline style="width:100%;height:54px;"></<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
+  <button type="button" id="audioToggle">▶️ Reproducir / Pausar</button>
+  <button type="button" id="audioRestart">⏮️ Volver al inicio</button>
+</div>
 
 <script>
 document.getElementById('audioFile').addEventListener('change', function() {
@@ -232,6 +235,32 @@ document.getElementById('audioFile').addEventListener('change', function() {
     const player = document.getElementById('audioPlayer');
     player.src = URL.createObjectURL(file);
     player.load();
+  }
+});
+  const player = document.getElementById('audioPlayer');
+const toggle = document.getElementById('audioToggle');
+const restart = document.getElementById('audioRestart');
+
+toggle.addEventListener('click', function() {
+  if (player.paused) {
+    player.play();
+  } else {
+    player.pause();
+  }
+});
+
+player.addEventListener('play', function() {
+  toggle.textContent = '⏸️ Pausar';
+});
+
+player.addEventListener('pause', function() {
+  toggle.textContent = '▶️ Reproducir';
+});
+
+restart.addEventListener('click', function() {
+  player.currentTime = 0;
+  if (player.src) {
+    player.play();
   }
 });
 </script>
