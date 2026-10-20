@@ -1,0 +1,437 @@
+<!doctype html>
+<!-- NOTA DE CONTINUACIÓN:
+Borrador derivado de index-RESPALDO-FUNCIONANDO .txt.
+Se añadió importación local de canciones .txt y .md.
+No se ha cambiado la Biblia: sigue en Reina-Valera 1909.
+Decisión de continuidad: conservar Reina-Valera 1909 por ahora y añadir controles visibles para cargar, guardar y reproducir audio de canciones.
+Copia de prueba de audio: mejora el control de carga, no considera válida una duración no numérica y solicita reproducción desde el gesto del botón. No se ha publicado en GitHub.
+-->
+
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#071a2b">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.svg">
+<title>Proyección Iglesia</title>
+<style>
+:root{--bg:#eef3f7;--card:#fff;--ink:#14202b;--muted:#667789;--navy:#071a2b;--blue:#0969ad;--gold:#e7b33d;--line:#d9e2ea}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+button,input,textarea,select{font:inherit}button{min-height:48px;border:0;border-radius:12px;padding:10px 14px;cursor:pointer}
+.app{min-height:100vh}.top{position:sticky;top:0;z-index:10;background:var(--navy);color:#fff;padding:14px max(14px,env(safe-area-inset-left));display:flex;align-items:center;justify-content:space-between;gap:10px}.brand{font-weight:800;font-size:20px}.sub{font-size:11px;opacity:.7}.top button{background:#18344c;color:#fff}
+.wrap{max-width:1050px;margin:auto;padding:14px}.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}.tabs button{background:#fff;border:1px solid var(--line);color:var(--ink);font-weight:700}.tabs button.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.panel{display:none}.panel.active{display:block}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:15px;box-shadow:0 2px 8px #00000008}.card h2,.card h3{margin:0 0 10px}.muted{color:var(--muted);font-size:13px}.search{width:100%;border:1px solid var(--line);border-radius:12px;padding:13px;background:#fff}.list{display:grid;gap:8px;margin-top:10px}.item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px;border:1px solid var(--line);border-radius:12px;background:#fff}.item button{background:#eaf4fb;color:#075b93;font-weight:700}
+.preview{min-height:260px;border-radius:16px;background:#071a2b;color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;padding:25px}.preview .content{font-size:clamp(28px,6vw,58px);font-weight:700;line-height:1.2;white-space:pre-wrap}.controls{display:grid;grid-template-columns:1fr 1.5fr 1fr;gap:8px;margin-top:10px}.prev{background:#edf1f4}.project{background:var(--blue);color:#fff;font-weight:800;font-size:18px}.next{background:#edf1f4}
+textarea{width:100%;min-height:110px;border:1px solid var(--line);border-radius:12px;padding:12px;resize:vertical}.row{display:flex;gap:8px;flex-wrap:wrap}.primary{background:var(--blue);color:#fff;font-weight:700}.danger{background:#feecec;color:#a21c1c}.gold{background:#fff5d8;color:#725300;font-weight:700}
+.culto{display:grid;gap:8px}.culto .item{cursor:pointer}.small{font-size:12px}label{display:block;font-size:13px;font-weight:700;margin:0 0 6px;color:var(--muted)}select.search{color:var(--ink)}hr{border:0;border-top:1px solid var(--line)}
+.empty{text-align:center;padding:25px;color:var(--muted)}
+.modal{position:fixed;inset:0;background:#0008;display:none;z-index:100;padding:20px;align-items:center;justify-content:center}.modal.open{display:flex}.modalbox{width:min(900px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:18px;padding:18px}
+.projection{position:fixed;inset:0;background:var(--proj-bg,#000);color:var(--proj-fg,#fff);z-index:200;display:none;align-items:center;justify-content:center;text-align:center;padding:8vh 7vw 12vh;transition:background .2s,color .2s}.projection.open{display:flex}.projectionText{font-size:var(--proj-size,clamp(34px,8vw,96px));font-weight:800;line-height:1.18;white-space:pre-wrap;max-width:100%;max-height:100%;overflow:auto;overflow-wrap:anywhere}.closeProj{position:fixed;top:12px;right:12px;background:#ffffff22;color:inherit;z-index:2}.projectionTools{position:fixed;left:12px;right:12px;bottom:12px;display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;z-index:2}.projectionTools button{background:#ffffffed;color:#14202b;min-height:42px;font-weight:700}.projectionTools .themeButton{background:#18344c;color:#fff}.songAudioBox{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:14px;background:#f7fafc}.songAudioBox audio{display:block;width:100%;min-height:48px;margin-top:8px}.projectionAudio{position:fixed;left:12px;right:12px;bottom:12px;z-index:4;display:none;background:#ffffffed;color:#14202b;border-radius:12px;padding:8px 12px;text-align:left;box-shadow:0 2px 14px #0005}.projectionAudio.visible{display:block}.projectionAudio audio{width:100%;min-height:42px}.projectionAudio .audioTitle{font-size:12px;font-weight:700;margin-bottom:4px}@media(max-width:700px){.projectionAudio{bottom:10px;left:8px;right:8px;padding:6px 9px}}.projection[data-theme="blue"]{--proj-bg:#071a2b;--proj-fg:#fff}.projection[data-theme="light"]{--proj-bg:#fff;--proj-fg:#14202b}.projection[data-theme="black"]{--proj-bg:#000;--proj-fg:#fff}
+@media(max-width:700px){.grid{grid-template-columns:1fr}.tabs{grid-template-columns:repeat(2,1fr)}.controls{grid-template-columns:1fr 1.3fr 1fr}.wrap{padding:10px}.top{padding-top:max(12px,env(safe-area-inset-top))}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top">
+  <div><div class="brand">📽️ Proyección Iglesia</div><div class="sub">Canciones · Biblia · Culto · Proyección</div></div>
+  <button onclick="openProjection()">🖥️ Proyectar</button>
+</header>
+
+<main class="wrap">
+<nav class="tabs">
+<button class="active" onclick="tab('songs',this)">🎵 Canciones</button>
+<button onclick="tab('bible',this)">📖 Biblia</button>
+<button onclick="tab('service',this)">📋 Culto</button>
+<button onclick="tab('slides',this)">📝 Diapositivas</button>
+</nav>
+
+<section id="songs" class="panel active">
+<div class="grid">
+<div class="card"><h2>Canciones</h2><input class="search" id="songSearch" placeholder="Buscar canción..." oninput="renderSongs()"><div id="songList" class="list"></div></div>
+<div class="card"><h2>Editor</h2><input class="search" id="songTitle" placeholder="Título de la canción"><br><br><textarea id="songText" placeholder="Escribe cada estrofa o parte de la canción. Usa líneas en blanco para separar diapositivas."></textarea><br><br><div class="row"><button class="primary" onclick="saveSong()">💾 Guardar</button><button class="danger" onclick="deleteSong()">Eliminar</button></div><p class="muted">Las canciones se guardan en este dispositivo.</p>
+<div class="songAudioBox">
+<h3>🎧 Música de esta canción</h3>
+<label for="songAudioFile">1. Selecciona el archivo de audio</label>
+<input class="search" type="file" id="songAudioFile" accept="audio/*,.mp3,.m4a,.wav,.aac,.ogg" >
+<button id="btnLoadSongAudio" class="primary" type="button" onclick="audioLoadButtonClick()">▶ Cargar y reproducir audio</button>
+<p id="songAudioName" class="muted">Selecciona el archivo y después pulsa «Cargar y probar audio».</p>
+<div class="row"><button class="primary" type="button" onclick="saveSongAudio()">💾 Guardar audio</button><button id="btnRemoveSongAudio" class="danger" type="button" onclick="audioRemoveButtonClick()">Quitar audio</button></div>
+<audio id="songAudioPlayer" controls playsinline preload="metadata" style="width:100%;margin-top:10px;min-height:48px"></audio>
+<p id="songAudioStatus" class="muted" role="status">Selecciona una canción para asociarle su música. Después pulsa Guardar audio y usa ▶ en el reproductor.</p>
+</div>
+<hr style="border:0;border-top:1px solid var(--line);margin:16px 0">
+<h3>Importar canciones</h3>
+<label for="songFiles">Selecciona archivos .txt o .md</label>
+<input class="search" type="file" id="songFiles" accept=".txt,.md,text/plain,text/markdown" multiple>
+<p class="muted">El nombre del archivo será el título. Las líneas en blanco separan las diapositivas. Si el título ya existe, se actualizará.</p>
+<button class="primary" type="button" onclick="importSongs()">📥 Importar archivos</button>
+<p id="importStatus" class="muted" role="status"></p>
+</div>
+</div>
+</section>
+
+<section id="bible" class="panel">
+<div class="grid">
+<div class="card"><h2>📖 Biblia Reina-Valera 1909</h2><label for="bibleRef">Buscar por referencia</label><input class="search" id="bibleRef" placeholder="Ej.: Efesios 2:11-22"><br><br><button class="primary" onclick="loadBible()">🔎 Buscar referencia</button><hr style="border:0;border-top:1px solid var(--line);margin:18px 0"><h3>Seleccionar pasaje</h3><label for="bibleBook">Libro</label><select class="search" id="bibleBook" onchange="updateBibleChapters()"></select><br><br><div class="row"><div style="flex:1;min-width:120px"><label for="bibleChapter">Capítulo</label><select class="search" id="bibleChapter" onchange="updateBibleRefFromSelectors()"></select></div><div style="flex:1;min-width:120px"><label for="bibleVerseStart">Versículo inicial</label><input class="search" id="bibleVerseStart" type="number" min="1" max="176" value="1" oninput="updateBibleRefFromSelectors()"></div><div style="flex:1;min-width:120px"><label for="bibleVerseEnd">Versículo final</label><input class="search" id="bibleVerseEnd" type="number" min="1" max="176" placeholder="Igual al inicial" oninput="updateBibleRefFromSelectors()"></div></div><br><button class="primary" onclick="prepareBibleSelection()">📖 Preparar selección</button><p id="bibleStatus" class="muted" role="status">Puedes buscar una referencia o seleccionar libro, capítulo y versículos.</p><div id="bibleList" class="list"></div><p class="muted">Texto: Reina-Valera 1909. Los pasajes consultados se guardan en este dispositivo para poder volver a usarlos sin conexión.</p></div>
+<div class="card"><h2>Vista previa</h2><div class="preview"><div id="biblePreview" class="content">Selecciona un pasaje.</div></div><div class="controls"><button class="prev" onclick="previous()">◀</button><button class="project" onclick="openProjection()">PROYECTAR</button><button class="next" onclick="next()">▶</button></div></div>
+</div>
+</section>
+
+<section id="service" class="panel">
+<div class="card"><h2>Orden del culto</h2><p class="muted">Agrega canciones, pasajes o diapositivas y avanza durante el culto.</p><div class="row"><button class="primary" onclick="addCurrent()">➕ Agregar elemento actual</button><button class="primary" onclick="startService()">▶️ Iniciar culto</button><button class="gold" onclick="clearService()">Limpiar orden</button></div><div id="serviceList" class="culto" style="margin-top:12px"></div></div>
+</section>
+
+<section id="slides" class="panel">
+<div class="grid">
+<div class="card"><h2>Diapositiva</h2><input class="search" id="slideTitle" placeholder="Título"><br><br><textarea id="slideText" placeholder="Texto que quieres proyectar"></textarea><br><br><button class="primary" onclick="saveSlide()">💾 Guardar diapositiva</button></div>
+<div class="card"><h2>Mis diapositivas</h2><div id="slideList" class="list"></div></div>
+</div>
+</section>
+</main>
+</div>
+
+<div id="slidePreview" class="modal"><div class="modalbox"><div class="row" style="justify-content:space-between;align-items:center"><h2 id="slidePreviewTitle" style="margin:0">Vista previa</h2><button class="danger" onclick="closeSlidePreview()">Cerrar</button></div><div class="preview" style="margin-top:12px"><div id="slidePreviewText" class="content"></div></div><div class="controls"><button class="prev" onclick="previous();updateSlidePreview()">◀</button><button class="project" onclick="closeSlidePreview();openProjection()">PROYECTAR</button><button class="next" onclick="next();updateSlidePreview()">▶</button></div></div></div>
+<div id="projection" class="projection">
+<button class="closeProj" onclick="closeProjection()">✕ Cerrar</button>
+<div id="projectionText" class="projectionText"></div>
+<div id="projectionAudio" class="projectionAudio" aria-label="Reproductor de música durante la proyección">
+<div id="projectionAudioTitle" class="audioTitle">🎵 Música</div>
+<audio id="projectionAudioPlayer" controls playsinline preload="metadata"></audio>
+</div>
+<div id="projectionTools" class="projectionTools" aria-label="Controles de proyección">
+<button onclick="changeProjectionSize(-1)" aria-label="Disminuir letra">A−</button>
+<button onclick="changeProjectionSize(1)" aria-label="Aumentar letra">A+</button>
+<button class="themeButton" onclick="cycleProjectionTheme()">🎨 Fondo</button>
+<button onclick="previous();openProjection()">◀ Anterior</button>
+<button onclick="next();openProjection()">Siguiente ▶</button>
+</div>
+</div>
+
+<!-- Firebase Sync TEST: iPhone controller <-> iPad display -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+  (function(){
+  const p=document.getElementById('projection');
+    p.querySelector('.projectionTools').style.display='none';
+    p.querySelector('.closeProj').style.display='none';
+  let sx=0,sy=0,t0=0,lastTap=0;
+  p.addEventListener('touchstart',e=>{
+    const t=e.changedTouches[0];
+    sx=t.clientX;
+    sy=t.clientY;
+    t0=Date.now();
+  },{passive:true});
+
+  p.addEventListener('touchend',e=>{
+    const t=e.changedTouches[0];
+    const dx=t.clientX-sx;
+    const dy=t.clientY-sy;
+    const dt=Date.now()-t0;
+
+    if(Math.abs(dx)>60 && Math.abs(dx)>Math.abs(dy)){
+      if(dx<0){next();}else{previous();}
+      openProjection();
+      return;
+    }
+
+    if(Math.abs(dx)<20 && Math.abs(dy)<20 && dt<350){
+      const now=Date.now();
+      if(now-lastTap<400){
+        closeProjection();
+        lastTap=0;
+      }else{
+        lastTap=now;
+      }
+    }
+  },{passive:true});
+})();
+const KEY='PROYECCION_IGLESIA_V8';
+let db=JSON.parse(localStorage.getItem(KEY)||'null')||{
+songs:[
+{title:'Grande es tu fidelidad',text:'Grande es tu fidelidad\\nGrande es tu fidelidad\\nCada mañana me haces despertar\\nGrande es tu fidelidad'},
+{title:'Ejemplo — Canción nueva',text:'Escribe aquí la letra de tu canción\\n\\nCORO\\nEscribe aquí el coro'}
+],
+slides:[{title:'Bienvenidos',text:'Bienvenidos a nuestro culto\\nDios les bendiga'}],
+service:[], current:{type:'slide',title:'Bienvenidos',text:'Bienvenidos a nuestro culto\\nDios les bendiga'}, index:0
+};
+function persist(){localStorage.setItem(KEY,JSON.stringify(db))}
+function migrateLegacyData(){
+  const demo=db.songs.find(s=>s.title==='Grande es tu fidelidad');
+  if(demo && (!demo.text.includes('\n') || /Grande es tu fidelidadGrande/.test(demo.text))){
+    demo.text='Grande es tu fidelidad\nGrande es tu fidelidad\n\nCada mañana me haces despertar\nGrande es tu fidelidad';
+  }
+  db.songs.forEach(s=>{ s.text=normalizeText(s.text); });
+  persist();
+}
+
+function tab(id,btn){document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('active'));btn.classList.add('active');if(id==='songs')renderSongs();if(id==='slides')renderSlides();if(id==='service')renderService()}
+function renderSongs(){let q=(document.getElementById('songSearch').value||'').toLowerCase();let el=document.getElementById('songList');el.innerHTML='';db.songs.filter(s=>s.title.toLowerCase().includes(q)).forEach((s,i)=>{let d=document.createElement('div');d.className='item';d.innerHTML='<span>🎵 '+esc(s.title)+'</span><button onclick="selectSong('+i+')">Abrir</button>';el.appendChild(d)})}
+function normalizeText(t){return String(t||'').replace(/\[n\]/g,'\n').replace(/\\n/g,'\n').replace(/\r\n/g,'\n').replace(/\r/g,'\n').trim()}
+function selectSong(i){let s=db.songs[i];s.text=normalizeText(s.text);db.current={type:'song',title:s.title,text:s.text,index:0};document.getElementById('songTitle').value=s.title;document.getElementById('songText').value=s.text;showCurrent();persist();loadSongAudio(s.title)}
+function saveSong(){let title=document.getElementById('songTitle').value.trim(),text=normalizeText(document.getElementById('songText').value);if(!title||!text){const msg='Para guardar una canción, escribe el título y la letra.';alert(msg);const st=document.getElementById('songAudioStatus');if(st)st.textContent=msg;return false}let i=db.songs.findIndex(x=>x.title===title);if(i>=0)db.songs[i]={...db.songs[i],title,text};else db.songs.push({title,text});db.current={type:'song',title,text,index:0};persist();renderSongs();showCurrent();loadSongAudio(title);const st=document.getElementById('songAudioStatus');if(st)st.textContent='Canción guardada. Ya puedes asociarle un archivo de audio.';return true}
+
+async function importSongs(){
+  const input=document.getElementById('songFiles');
+  const status=document.getElementById('importStatus');
+  const files=Array.from(input.files||[]);
+  if(!files.length){status.textContent='Selecciona primero uno o más archivos .txt o .md.';return;}
+  let added=0,updated=0,skipped=0;
+  for(const file of files){
+    try{
+      let text=normalizeText(await file.text());
+      if(!text){skipped++;continue;}
+      let title=file.name.replace(/\.(txt|md)$/i,'').trim();
+      // For Markdown, remove a leading H1/H2 title when it duplicates the filename.
+      const heading=text.match(/^#{1,2}\s+(.+?)\s*$/m);
+      if(heading){
+        const headingTitle=heading[1].trim();
+        text=text.replace(/^#{1,2}\s+.+?\s*(?:\r?\n)+/m,'').trim();
+        if(!title) title=headingTitle;
+      }
+      // Convert Markdown headings and common separators into clean slide breaks.
+      text=text.replace(/^#{1,6}\s*/gm,'').replace(/^\s*[-*_]{3,}\s*$/gm,'').trim();
+      if(!title||!text){skipped++;continue;}
+      const existing=db.songs.findIndex(s=>s.title.toLowerCase()===title.toLowerCase());
+      if(existing>=0){db.songs[existing]={title,text};updated++;}
+      else{db.songs.push({title,text});added++;}
+    }catch(error){skipped++;}
+  }
+  persist();
+  renderSongs();
+  status.textContent=`Importación terminada: ${added} nueva(s), ${updated} actualizada(s), ${skipped} omitida(s).`;
+  input.value='';
+}
+
+function deleteSong(){let title=document.getElementById('songTitle').value.trim();let i=db.songs.findIndex(x=>x.title===title);if(i<0)return;db.songs.splice(i,1);removeAudioRecord(title,true);document.getElementById('songTitle').value='';document.getElementById('songText').value='';document.getElementById('songAudioPlayer').removeAttribute('src');document.getElementById('songAudioPlayer').load();persist();renderSongs()}
+const SONG_AUDIO_DB='proyeccion_iglesia_audio_v1';
+let songAudioObjectUrl=null, projectionAudioObjectUrl=null, selectedPreviewUrl=null;
+function previewSelectedSongAudio(){
+ const input=document.getElementById('songAudioFile');
+ const file=input&&input.files&&input.files.length?input.files[0]:null;
+ const player=document.getElementById('songAudioPlayer');
+ const name=document.getElementById('songAudioName');
+ const status=document.getElementById('songAudioStatus');
+ if(!file){status.textContent='No hay archivo seleccionado. Selecciona el MP3 y vuelve a pulsar este botón.';name.textContent='No hay archivo disponible.';return;}
+ if(!player||!name||!status){alert('No se encontraron los controles del reproductor.');return;}
+ if(selectedPreviewUrl){try{URL.revokeObjectURL(selectedPreviewUrl)}catch(e){}selectedPreviewUrl=null;}
+ player.pause();player.onerror=null;player.onloadedmetadata=null;player.oncanplay=null;
+ player.removeAttribute('src');player.load();
+ name.textContent='Archivo: '+file.name+' ('+Math.round(file.size/1024)+' KB).';
+ status.textContent='Archivo recibido. Intentando reproducir…';
+ let fallbackStarted=false, validMetadata=false;
+ const showReady=()=>{const d=player.duration;if(Number.isFinite(d)&&d>0){validMetadata=true;status.textContent='Audio listo ('+Math.floor(d/60)+':'+String(Math.floor(d%60)).padStart(2,'0')+'). Si no comienza automáticamente, pulsa ▶ en el reproductor.';}};
+ player.onloadedmetadata=showReady;player.oncanplay=showReady;
+ player.onerror=()=>{
+   if(fallbackStarted)return;
+   fallbackStarted=true;
+   status.textContent='Safari no abrió la dirección temporal. Intentando leer el archivo directamente…';
+   readAudioAsDataURL(file,player,status,()=>{selectedPreviewUrl=null;});
+ };
+ try{
+   selectedPreviewUrl=URL.createObjectURL(file);
+   player.src=selectedPreviewUrl;
+   player.load();
+   // In iOS Safari, play() must be requested from the user's button gesture.
+   const attempt=player.play();
+   if(attempt&&typeof attempt.catch==='function')attempt.catch(()=>{status.textContent='El archivo está cargado. Pulsa ▶ en los controles del reproductor para iniciar el sonido.';});
+ }catch(err){
+   status.textContent='No se pudo abrir el archivo directamente. Intentando leerlo…';
+   fallbackStarted=true;readAudioAsDataURL(file,player,status,()=>{selectedPreviewUrl=null;});
+ }
+ // Do not treat readyState alone as success: Safari may report metadata without a valid duration.
+ setTimeout(()=>{
+   if(validMetadata||fallbackStarted)return;
+   fallbackStarted=true;
+   status.textContent='La carga directa no confirmó una duración válida. Probando lectura alternativa…';
+   readAudioAsDataURL(file,player,status,()=>{if(selectedPreviewUrl){try{URL.revokeObjectURL(selectedPreviewUrl)}catch(e){}selectedPreviewUrl=null;}});
+ },1800);
+}
+function readAudioAsDataURL(file,player,status,cleanup){
+ const reader=new FileReader();
+ reader.onerror=()=>{status.textContent='Safari no pudo leer el archivo seleccionado. El MP3 original no se modifica.';};
+ reader.onload=()=>{
+   try{
+     if(cleanup)cleanup();
+     player.onerror=()=>{status.textContent='El archivo se leyó, pero Safari no pudo decodificarlo. Código '+(player.error?player.error.code:'desconocido')+'.';};
+     player.src=String(reader.result||'');player.load();
+     player.onloadedmetadata=()=>{const d=player.duration;status.textContent=Number.isFinite(d)&&d>0?'Audio leído ('+Math.floor(d/60)+':'+String(Math.floor(d%60)).padStart(2,'0')+'). Pulsa ▶ para escuchar.' :'Safari leyó el archivo, pero no detectó una duración válida.';};
+   }catch(err){status.textContent='No se pudo preparar el audio: '+(err.message||'error de lectura');}
+ };
+ try{reader.readAsDataURL(file)}catch(err){status.textContent='No se pudo leer el archivo: '+(err.message||'error');}
+}
+
+function audioKey(title){return String(title||'').trim().toLocaleLowerCase('es');}
+function openSongAudioDB(){return new Promise((resolve,reject)=>{if(!('indexedDB' in window))return reject(new Error('Este navegador no permite guardar audio localmente.'));const req=indexedDB.open(SONG_AUDIO_DB,1);req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains('tracks'))req.result.createObjectStore('tracks',{keyPath:'key'})};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error||new Error('No se pudo abrir el almacenamiento de audio.'))})}
+async function getAudioRecord(title){const idb=await openSongAudioDB();try{return await new Promise((resolve,reject)=>{const tx=idb.transaction('tracks','readonly'),req=tx.objectStore('tracks').get(audioKey(title));req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>reject(req.error)})}finally{idb.close()}}
+async function putAudioRecord(title,file){const idb=await openSongAudioDB();try{await new Promise((resolve,reject)=>{const tx=idb.transaction('tracks','readwrite');tx.objectStore('tracks').put({key:audioKey(title),title:String(title).trim(),name:file.name,type:file.type||'audio/mpeg',blob:file,updatedAt:Date.now()});tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error||new Error('No se pudo guardar el audio.'));tx.onabort=()=>reject(tx.error||new Error('Se canceló el guardado.'))})}finally{idb.close()}}
+async function removeAudioRecord(title,silent=false){if(!title)return;try{const idb=await openSongAudioDB();try{await new Promise((resolve,reject)=>{const tx=idb.transaction('tracks','readwrite');tx.objectStore('tracks').delete(audioKey(title));tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)})}finally{idb.close()}if(!silent){document.getElementById('songAudioStatus').textContent='Audio quitado de esta canción.';document.getElementById('songAudioName').textContent='No hay audio guardado.';document.getElementById('songAudioPlayer').removeAttribute('src');document.getElementById('songAudioPlayer').load();hideProjectionAudio()}}catch(err){if(!silent)document.getElementById('songAudioStatus').textContent='No pude quitar el audio: '+err.message}}
+async function saveSongAudio(){const title=document.getElementById('songTitle').value.trim(),input=document.getElementById('songAudioFile'),file=input.files&&input.files[0],status=document.getElementById('songAudioStatus');if(!title){status.textContent='Falta el título. Escribe el título de la canción y pulsa Guardar antes de asociar la música.';document.getElementById('songTitle').focus();return}if(!file){status.textContent='Primero selecciona un archivo de audio.';return}if(file.size===0){status.textContent='El archivo está vacío. Selecciona otro audio.';return}status.textContent='Guardando audio…';try{await putAudioRecord(title,file);await loadSongAudio(title);status.textContent='Audio guardado para «'+title+'». Pulsa ▶ en el reproductor para escucharlo.';input.value='';if(selectedPreviewUrl){URL.revokeObjectURL(selectedPreviewUrl);selectedPreviewUrl=null}}catch(err){status.textContent='No se pudo guardar el audio: '+(err&&err.message?err.message:'error desconocido')}}
+async function loadSongAudio(title){const name=document.getElementById('songAudioName'),player=document.getElementById('songAudioPlayer'),status=document.getElementById('songAudioStatus');if(!title){name.textContent='Selecciona una canción.';return}try{const record=await getAudioRecord(title);if(songAudioObjectUrl){URL.revokeObjectURL(songAudioObjectUrl);songAudioObjectUrl=null}if(record&&record.blob){songAudioObjectUrl=URL.createObjectURL(record.blob);player.src=songAudioObjectUrl;player.load();name.textContent='Audio guardado: '+record.name;status.textContent='Audio listo para reproducir.';await loadProjectionAudio(title,record)}else{player.removeAttribute('src');player.load();name.textContent='No hay audio guardado para «'+title+'».';status.textContent='Selecciona un archivo y pulsa Guardar audio.';hideProjectionAudio()}}catch(err){status.textContent='No pude consultar el audio guardado: '+(err&&err.message?err.message:'error desconocido')}}
+async function loadProjectionAudio(title,knownRecord=null){const box=document.getElementById('projectionAudio'),player=document.getElementById('projectionAudioPlayer'),label=document.getElementById('projectionAudioTitle');if(!title||!db.current||db.current.type!=='song'||db.current.title!==title){hideProjectionAudio();return}try{const record=knownRecord||await getAudioRecord(title);if(!record||!record.blob){hideProjectionAudio();return}if(projectionAudioObjectUrl)URL.revokeObjectURL(projectionAudioObjectUrl);projectionAudioObjectUrl=URL.createObjectURL(record.blob);player.src=projectionAudioObjectUrl;player.load();label.textContent='🎵 '+title;box.classList.add('visible')}catch(e){hideProjectionAudio()}}
+function hideProjectionAudio(){const box=document.getElementById('projectionAudio'),player=document.getElementById('projectionAudioPlayer');if(box)box.classList.remove('visible');if(player){player.pause();player.removeAttribute('src');player.load()}if(projectionAudioObjectUrl){URL.revokeObjectURL(projectionAudioObjectUrl);projectionAudioObjectUrl=null}}
+function removeSongAudio(){
+ const title=document.getElementById('songTitle').value.trim();
+ const player=document.getElementById('songAudioPlayer');
+ const status=document.getElementById('songAudioStatus');
+ const name=document.getElementById('songAudioName');
+ // Always clear the visible/temporary preview, even when no song title exists.
+ try{if(player){player.pause();player.removeAttribute('src');player.load();}}catch(e){}
+ if(selectedPreviewUrl){try{URL.revokeObjectURL(selectedPreviewUrl)}catch(e){}selectedPreviewUrl=null;}
+ if(songAudioObjectUrl){try{URL.revokeObjectURL(songAudioObjectUrl)}catch(e){}songAudioObjectUrl=null;}
+ if(!title){
+   if(name)name.textContent='Vista previa quitada. No se borró ningún audio guardado.';
+   if(status)status.textContent='Se quitó el audio temporal del reproductor. Para guardar o quitar música asociada, abre primero una canción.';
+   return;
+ }
+ removeAudioRecord(title);
+}
+const BIBLE_API='https://biblia-api.qhar.in';
+const BIBLE_CACHE_DB='proyeccion_iglesia_rv1909_cache_v1';
+const BIBLE_BOOKS=[
+{id:'GEN',name:'Génesis',chapters:50},{id:'EXO',name:'Éxodo',chapters:40},{id:'LEV',name:'Levítico',chapters:27},{id:'NUM',name:'Números',chapters:36},{id:'DEU',name:'Deuteronomio',chapters:34},{id:'JOS',name:'Josué',chapters:24},{id:'JDG',name:'Jueces',chapters:21},{id:'RUT',name:'Rut',chapters:4},{id:'1SA',name:'1 Samuel',chapters:31},{id:'2SA',name:'2 Samuel',chapters:24},{id:'1KI',name:'1 Reyes',chapters:22},{id:'2KI',name:'2 Reyes',chapters:25},{id:'1CH',name:'1 Crónicas',chapters:29},{id:'2CH',name:'2 Crónicas',chapters:36},{id:'EZR',name:'Esdras',chapters:10},{id:'NEH',name:'Nehemías',chapters:13},{id:'EST',name:'Ester',chapters:10},{id:'JOB',name:'Job',chapters:42},{id:'PSA',name:'Salmos',chapters:150},{id:'PRO',name:'Proverbios',chapters:31},{id:'ECC',name:'Eclesiastés',chapters:12},{id:'SNG',name:'Cantares',chapters:8},{id:'ISA',name:'Isaías',chapters:66},{id:'JER',name:'Jeremías',chapters:52},{id:'LAM',name:'Lamentaciones',chapters:5},{id:'EZK',name:'Ezequiel',chapters:48},{id:'DAN',name:'Daniel',chapters:12},{id:'HOS',name:'Oseas',chapters:14},{id:'JOL',name:'Joel',chapters:3},{id:'AMO',name:'Amós',chapters:9},{id:'OBA',name:'Abdías',chapters:1},{id:'JON',name:'Jonás',chapters:4},{id:'MIC',name:'Miqueas',chapters:7},{id:'NAM',name:'Nahúm',chapters:3},{id:'HAB',name:'Habacuc',chapters:3},{id:'ZEP',name:'Sofonías',chapters:3},{id:'HAG',name:'Hageo',chapters:2},{id:'ZEC',name:'Zacarías',chapters:14},{id:'MAL',name:'Malaquías',chapters:4},
+{id:'MAT',name:'Mateo',chapters:28},{id:'MRK',name:'Marcos',chapters:16},{id:'LUK',name:'Lucas',chapters:24},{id:'JHN',name:'Juan',chapters:21},{id:'ACT',name:'Hechos',chapters:28},{id:'ROM',name:'Romanos',chapters:16},{id:'1CO',name:'1 Corintios',chapters:16},{id:'2CO',name:'2 Corintios',chapters:13},{id:'GAL',name:'Gálatas',chapters:6},{id:'EPH',name:'Efesios',chapters:6},{id:'PHP',name:'Filipenses',chapters:4},{id:'COL',name:'Colosenses',chapters:4},{id:'1TH',name:'1 Tesalonicenses',chapters:5},{id:'2TH',name:'2 Tesalonicenses',chapters:3},{id:'1TI',name:'1 Timoteo',chapters:6},{id:'2TI',name:'2 Timoteo',chapters:4},{id:'TIT',name:'Tito',chapters:3},{id:'PHM',name:'Filemón',chapters:1},{id:'HEB',name:'Hebreos',chapters:13},{id:'JAS',name:'Santiago',chapters:5},{id:'1PE',name:'1 Pedro',chapters:5},{id:'2PE',name:'2 Pedro',chapters:3},{id:'1JN',name:'1 Juan',chapters:5},{id:'2JN',name:'2 Juan',chapters:1},{id:'3JN',name:'3 Juan',chapters:1},{id:'JUD',name:'Judas',chapters:1},{id:'REV',name:'Apocalipsis',chapters:22}
+];
+function normalizeBibleName(s){return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/^(san|santa)\s+/,'').replace(/\s+/g,' ').trim()}
+function initBibleSelectors(){const el=document.getElementById('bibleBook');if(!el)return;el.innerHTML=BIBLE_BOOKS.map(b=>'<option value="'+b.id+'">'+esc(b.name)+'</option>').join('');updateBibleChapters();}
+function updateBibleChapters(){const book=BIBLE_BOOKS.find(b=>b.id===document.getElementById('bibleBook').value)||BIBLE_BOOKS[0];const el=document.getElementById('bibleChapter');el.innerHTML=Array.from({length:book.chapters},(_,i)=>'<option value="'+(i+1)+'">Capítulo '+(i+1)+'</option>').join('');updateBibleRefFromSelectors()}
+function updateBibleRefFromSelectors(){const book=BIBLE_BOOKS.find(b=>b.id===document.getElementById('bibleBook').value)||BIBLE_BOOKS[0];const chapter=Number(document.getElementById('bibleChapter').value||1);const start=Math.max(1,Number(document.getElementById('bibleVerseStart').value||1));const end=Number(document.getElementById('bibleVerseEnd').value||start);document.getElementById('bibleRef').value=book.name+' '+chapter+':'+start+(end>start?'-'+end:'')}
+function prepareBibleSelection(){updateBibleRefFromSelectors();loadBible()}
+function parseBibleReference(ref){const m=String(ref||'').trim().match(/^(.*?)\s+(\d+)\s*:\s*(\d+)(?:\s*-\s*(\d+))?$/);if(!m)return null;const given=normalizeBibleName(m[1]);const aliases={'salmo':'Salmos','salmos':'Salmos','cantar de los cantares':'Cantares','revelacion':'Apocalipsis','apocalipsis':'Apocalipsis','hechos de los apostoles':'Hechos','san mateo':'Mateo','san marcos':'Marcos','san lucas':'Lucas','san juan':'Juan','1 san juan':'1 Juan','2 san juan':'2 Juan','3 san juan':'3 Juan','1 san pedro':'1 Pedro','2 san pedro':'2 Pedro'};const target=normalizeBibleName(aliases[given]||given);const book=BIBLE_BOOKS.find(b=>normalizeBibleName(b.name)===target);if(!book)return null;const chapter=Number(m[2]),start=Number(m[3]),end=Number(m[4]||m[3]);if(chapter<1||chapter>book.chapters||start<1||end<start||end-start>175)return null;return {book,chapter,start,end,ref:book.name+' '+chapter+':'+start+(end>start?'-'+end:'')}}
+function openBibleCache(){return new Promise((resolve,reject)=>{if(!('indexedDB' in window))return reject(new Error('IndexedDB no disponible'));const req=indexedDB.open(BIBLE_CACHE_DB,1);req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains('verses'))req.result.createObjectStore('verses',{keyPath:'key'})};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
+async function cacheBibleVerses(bookId,chapter,verses){const idb=await openBibleCache();await new Promise((resolve,reject)=>{const tx=idb.transaction('verses','readwrite'),store=tx.objectStore('verses');verses.forEach(v=>store.put({key:bookId+'.'+chapter+'.'+Number(v.number),content:String(v.content||'').replace(/^\[\d+\]\s*/,'')}));tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});idb.close()}
+async function getCachedBibleVerses(bookId,chapter,start,end){const idb=await openBibleCache();const vals=await new Promise((resolve,reject)=>{const tx=idb.transaction('verses','readonly'),store=tx.objectStore('verses'),out=[];let pending=end-start+1;for(let n=start;n<=end;n++){const req=store.get(bookId+'.'+chapter+'.'+n);req.onsuccess=()=>{out[n-start]=req.result||null;if(--pending===0)resolve(out)};req.onerror=()=>reject(req.error)}});idb.close();return vals.every(Boolean)?vals.map((v,i)=>({number:start+i,content:v.content})):null}
+async function loadBible(){let ref=document.getElementById('bibleRef').value.trim();if(!ref){document.getElementById('bibleStatus').textContent='Escribe una referencia, por ejemplo Efesios 2:11-22.';return}const parsed=parseBibleReference(ref);if(!parsed){document.getElementById('bibleStatus').textContent='No reconocí la referencia. Usa el formato Libro capítulo:versículo, por ejemplo Juan 3:16-18, o selecciona el pasaje abajo.';return}document.getElementById('bibleStatus').textContent='Buscando '+parsed.ref+'…';try{let verses;try{const url=BIBLE_API+'/book/'+parsed.book.id.toLowerCase()+'/chapter/'+parsed.chapter+'/verse/'+parsed.start+(parsed.end>parsed.start?'-'+parsed.end:'');const response=await fetch(url);if(!response.ok)throw new Error('No se pudo consultar el servicio bíblico');const data=await response.json();if(!Array.isArray(data)||!data.length||!data[0].content)throw new Error('El servicio no devolvió versículos');verses=data;try{await cacheBibleVerses(parsed.book.id,parsed.chapter,verses)}catch(cacheError){/* La consulta puede mostrarse aunque el dispositivo no permita guardar la caché. */}}catch(netError){verses=await getCachedBibleVerses(parsed.book.id,parsed.chapter,parsed.start,parsed.end);if(!verses)throw netError}const parts=verses.map(v=>String(v.content||'').replace(/^\[\d+\]\s*/,''));const text=parts.join('\n\n');db.current={type:'bible',title:parsed.ref,text,index:0};persist();showCurrent();document.getElementById('bibleList').innerHTML='<div class="item"><span>📖 '+esc(parsed.ref)+'</span><button onclick="openProjection()">Proyectar</button></div>';document.getElementById('bibleStatus').textContent='Pasaje listo. '+parts.length+' versículo(s) cargado(s)'+(navigator.onLine?' y guardados en este dispositivo.':'; modo sin conexión.')}catch(err){document.getElementById('bibleStatus').textContent='No pude cargar ese pasaje. Conéctate a Internet la primera vez para guardarlo; después podrás volver a usarlo sin conexión. Detalle: '+(err&&err.message?err.message:'error de conexión');document.getElementById('bibleList').innerHTML=''}}
+
+function saveSlide(){let title=document.getElementById('slideTitle').value.trim(),text=normalizeText(document.getElementById('slideText').value);if(!title||!text)return alert('Completa título y texto.');db.slides.push({title,text});db.current={type:'slide',title,text,index:0};persist();renderSlides();showCurrent()}
+function renderSlides(){let el=document.getElementById('slideList');el.innerHTML='';db.slides.forEach((s,i)=>{let d=document.createElement('div');d.className='item';d.innerHTML='<span>📝 '+esc(s.title)+'</span><button type="button">Abrir</button>';d.querySelector('button').addEventListener('click',()=>openSlide(i));d.querySelector('button').addEventListener('touchend',(e)=>{e.preventDefault();openSlide(i)},{passive:false});el.appendChild(d)})}
+function selectSlide(i){let s=db.slides[i];db.current={type:'slide',title:s.title,text:normalizeText(s.text),index:0};showCurrent();persist()}
+function openSlide(i){const s=db.slides[i];if(!s){alert('No se encontró la diapositiva.');return;}db.current={type:'slide',title:s.title,text:normalizeText(s.text),index:0};document.getElementById('slidePreviewTitle').textContent=s.title;document.getElementById('slidePreviewText').textContent=normalizeText(s.text);document.getElementById('slidePreview').classList.add('open');persist();}
+function closeSlidePreview(){document.getElementById('slidePreview').classList.remove('open')}
+function updateSlidePreview(){document.getElementById('slidePreviewText').textContent=splitCurrent()[db.current.index||0]||db.current.text||''}
+function splitCurrent(){let t=normalizeText(db.current.text);if(!t)return [''];let p=t.split(/\n\s*\n/).filter(x=>x.trim());return p.length?p:[t]}
+function showCurrent(){let parts=splitCurrent();let idx=Math.max(0,Math.min(db.current.index||0,parts.length-1));db.current.index=idx;let text=parts[idx]||db.current.text||'';document.getElementById('biblePreview').textContent=text;persist()}
+function next(){let p=splitCurrent();if(db.current.index<p.length-1){db.current.index++;showCurrent()}else{let n=db.service.findIndex(s=>s.type===db.current.type&&s.title===db.current.title&&s.text===db.current.text);if(n>=0&&n<db.service.length-1){db.current={...db.service[n+1],index:0};showCurrent();if(document.getElementById('projection').classList.contains('open')){document.getElementById('projectionText').textContent=splitCurrent()[0]||db.current.text||'';if(db.current.type==='song')loadProjectionAudio(db.current.title);else hideProjectionAudio()}}}}
+function previous(){if(db.current.index>0){db.current.index--;showCurrent()}}
+let projectionFontSize=72;let projectionThemes=['black','blue','light'];let projectionThemeIndex=0;
+function applyProjectionStyle(){const el=document.getElementById('projection');el.dataset.theme=projectionThemes[projectionThemeIndex];document.getElementById('projectionText').style.fontSize=projectionFontSize+'px'}
+function changeProjectionSize(delta){projectionFontSize=Math.max(28,Math.min(120,projectionFontSize+delta*6));applyProjectionStyle()}
+function cycleProjectionTheme(){projectionThemeIndex=(projectionThemeIndex+1)%projectionThemes.length;applyProjectionStyle()}
+function openProjection(){document.getElementById('projectionText').textContent=splitCurrent()[db.current.index||0]||db.current.text||'';applyProjectionStyle();document.getElementById('projection').classList.add('open');if(db.current.type==='song')loadProjectionAudio(db.current.title);else hideProjectionAudio()}
+function closeProjection(){document.getElementById('projection').classList.remove('open')}
+function addCurrent(){db.service.push({type:db.current.type,title:db.current.title,text:db.current.text});persist();renderService()}
+function renderService(){let el=document.getElementById('serviceList');el.innerHTML='';if(!db.service.length){el.innerHTML='<div class="empty">Todavía no hay elementos en el culto.</div>';return}db.service.forEach((s,i)=>{let d=document.createElement('div');d.className='item';let active=db.current&&db.current.type===s.type&&db.current.title===s.title&&db.current.text===s.text;if(active){d.style.background='#0969ad';d.style.color='#fff';d.style.borderColor='#0969ad'}d.innerHTML='<span><b>'+(i+1)+'.</b> '+esc(s.title)+'</span><span><button onclick="moveServiceUp('+i+')">▲</button><button onclick="moveServiceDown('+i+')">▼</button><button onclick="useService('+i+')">Usar</button><button onclick="removeService('+i+')">🗑️</button></span>';el.appendChild(d)})}function moveServiceUp(i){if(i<=0)return;[db.service[i-1],db.service[i]]=[db.service[i],db.service[i-1]];persist();renderService()}function moveServiceDown(i){if(i>=db.service.length-1)return;[db.service[i],db.service[i+1]]=[db.service[i+1],db.service[i]];persist();renderService()}function removeService(i){if(i<0||i>=db.service.length)return;if(confirm('¿Eliminar este elemento del orden del culto?')){db.service.splice(i,1);persist();renderService()}}
+  function startService(){if(!db.service.length){alert('Agrega al menos un elemento al culto.');return}db.current={...db.service[0],index:0};persist();renderService();showCurrent();openProjection()}
+function useService(i){const s=db.service[i];if(!s)return;db.current={...s,index:0};persist();showCurrent();openProjection()}
+function clearService(){if(confirm('¿Limpiar el orden del culto?')){db.service=[];persist();renderService()}}
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+
+// Direct inline handlers are used for iPad Safari compatibility and visible diagnostics.
+function audioLoadButtonClick(){
+ const status=document.getElementById('songAudioStatus');
+ if(status) status.textContent='Botón de carga pulsado. Revisando el archivo…';
+ try { previewSelectedSongAudio(); }
+ catch(error) { if(status) status.textContent='Error al cargar el audio: '+(error&&error.message?error.message:String(error)); }
+}
+function audioRemoveButtonClick(){
+ const status=document.getElementById('songAudioStatus');
+ if(status) status.textContent='Botón «Quitar audio» pulsado. Limpiando…';
+ try { removeSongAudio(); }
+ catch(error) { if(status) status.textContent='Error al quitar el audio: '+(error&&error.message?error.message:String(error)); }
+}
+migrateLegacyData();renderSongs();renderSlides();renderService();showCurrent();initBibleSelectors();
+
+/* ===== SINCRONIZACIÓN DE PRUEBA — no altera el guardado local ni el audio ===== */
+(function(){
+  const firebaseConfig = {
+    apiKey: "AIzaSyAodxSiSLs6yapYtuNL4jJYuhKLVSiXufTI",
+    authDomain: "proyeccion-iglesia-remoto.firebaseapp.com",
+    databaseURL: "https://proyeccion-iglesia-remoto-default-rtdb.firebaseio.com",
+    projectId: "proyeccion-iglesia-remoto",
+    storageBucket: "proyeccion-iglesia-remoto.firebasestorage.app",
+    messagingSenderId: "110302973707",
+    appId: "1:110302973707:web:8582a359b10a60292885c0e"
+  };
+  const params = new URLSearchParams(location.search);
+  const isDisplay = params.get('display') === '1';
+  const isControl = params.get('control') === '1';
+  const ROOM_STORAGE = 'PROYECCION_IGLESIA_SYNC_ROOM';
+  let room = localStorage.getItem(ROOM_STORAGE) || '';
+  if (!room) {
+    room = (prompt('Sincronización Proyección Iglesia: escribe una clave de sala y usa EXACTAMENTE la misma en el iPhone y el iPad. Ejemplo: Mina-2026-azul') || '').trim();
+    if (room) localStorage.setItem(ROOM_STORAGE, room);
+  }
+  function status(message){
+    let el=document.getElementById('syncStatus');
+    if(!el){el=document.createElement('div');el.id='syncStatus';el.style.cssText='position:fixed;z-index:9999;left:8px;top:8px;max-width:90vw;padding:8px 12px;border-radius:10px;background:#17344c;color:white;font:600 13px -apple-system,BlinkMacSystemFont,sans-serif;box-shadow:0 2px 8px #0005';document.body.appendChild(el);}
+    el.textContent='Sincronización: '+message;
+  }
+  if(isDisplay){
+    document.querySelector('.app').style.display='none';
+    document.getElementById('projection').classList.add('open');
+    document.getElementById('projectionTools').style.display='none';
+  }
+  if(!room){status('sin clave de sala; recarga y escribe una clave.');return;}
+  if(!window.firebase){status('no se cargó Firebase; revisa la conexión a Internet.');return;}
+  try {
+    if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const auth=firebase.auth();
+    auth.signInAnonymously().then(()=>{
+      const ref=firebase.database().ref('rooms/'+encodeURIComponent(room).replace(/\./g,'%2E')+'/screen');
+      status((isDisplay?'pantalla':'controlador')+' conectando…');
+      if(isDisplay){
+        ref.on('value',snap=>{
+          const data=snap.val();
+          if(!data || typeof data.text!=='string') return;
+          document.getElementById('projectionText').textContent=data.text;
+          if(data.theme && ['black','blue','light'].includes(data.theme)){
+            const projection=document.getElementById('projection');projection.dataset.theme=data.theme;
+          }
+          if(Number.isFinite(data.fontSize)) document.getElementById('projectionText').style.fontSize=data.fontSize+'px';
+          status('pantalla conectada · '+(data.title||'recibiendo texto'));
+        },err=>status('error de lectura: '+err.message));
+      } else {
+        window.__proyeccionSyncPublish=function(){
+          try {
+            const parts=splitCurrent();
+            const index=Math.max(0,Math.min(db.current.index||0,parts.length-1));
+            const text=parts[index]||db.current.text||'';
+            ref.set({text:String(text),title:String(db.current.title||''),type:String(db.current.type||''),index:index,theme:document.getElementById('projection').dataset.theme||'black',fontSize:parseInt(document.getElementById('projectionText').style.fontSize,10)||72,updatedAt:Date.now()})
+              .then(()=>status('controlador conectado · '+(db.current.title||'listo')))
+              .catch(err=>status('error al enviar: '+err.message));
+          } catch(err){status('no se pudo enviar: '+err.message)}
+        };
+        const oldShowCurrent=window.showCurrent;
+        window.showCurrent=function(){oldShowCurrent();window.__proyeccionSyncPublish();};
+        const oldOpenProjection=window.openProjection;
+        window.openProjection=function(){oldOpenProjection();window.__proyeccionSyncPublish();};
+        const oldChangeSize=window.changeProjectionSize;
+        window.changeProjectionSize=function(delta){oldChangeSize(delta);window.__proyeccionSyncPublish();};
+        const oldCycleTheme=window.cycleProjectionTheme;
+        window.cycleProjectionTheme=function(){oldCycleTheme();window.__proyeccionSyncPublish();};
+        status('controlador autenticado · enviando cambios');
+        window.__proyeccionSyncPublish();
+      }
+    }).catch(err=>status('no se pudo autenticar: '+err.message));
+  } catch(err){status('error de inicio: '+err.message);}
+})();
+/* ===== fin sincronización de prueba ===== */
+
+</script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));}
+// En Safari/iPad el usuario puede iniciar la carga manualmente tras elegir el archivo.
+document.addEventListener('DOMContentLoaded',()=>{
+ const audioInput=document.getElementById('songAudioFile');
+ if(audioInput){
+   audioInput.addEventListener('change',()=>{
+     const status=document.getElementById('songAudioStatus');
+     const file=audioInput.files && audioInput.files[0];
+     if(file) status.textContent='Archivo elegido: '+file.name+'. Ahora pulsa «Cargar y probar audio».';
+   });
+ }
+});
+</script>
+</body>
+</html>
