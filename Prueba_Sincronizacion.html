@@ -393,7 +393,15 @@ migrateLegacyData();renderSongs();renderSlides();renderService();showCurrent();i
           status('pantalla conectada · '+(data.title||'recibiendo texto'));
         },err=>status('error de lectura: '+err.message));
       } else {
-        window.__proyeccionSyncPublish=function(){
+        
+        const remoteControls = document.createElement('div');
+        remoteControls.id = 'remoteControls';
+        remoteControls.style.cssText = 'position:fixed;bottom:16px;left:8px;right:8px;z-index:9998;display:flex;gap:10px;justify-content:center;padding:10px;background:#071a2b;border-radius:14px;';
+        remoteControls.innerHTML = '<button id="remotePrev" style="flex:1;background:#fff;color:#14202b;font-weight:700;padding:14px">◀ Anterior</button><button id="remoteNext" style="flex:1;background:#0969ad;color:#fff;font-weight:700;padding:14px">Siguiente ▶</button>';
+        document.body.appendChild(remoteControls);
+        document.getElementById('remotePrev').onclick = function() { previous(); };
+        document.getElementById('remoteNext').onclick = function() { next(); };
+window.__proyeccionSyncPublish=function(){
           try {
             const parts=splitCurrent();
             const index=Math.max(0,Math.min(db.current.index||0,parts.length-1));
