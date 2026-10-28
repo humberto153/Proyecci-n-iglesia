@@ -1,5 +1,6 @@
-const CACHE='proyeccion-iglesia-v9';
-const ASSETS=['./','./index.html','./manifest.webmanifest','./icon-192.svg','./icon-512.svg'];
+
+const CACHE='proyeccion-iglesia-v10';
+const ASSETS=['./','./index.html','./Prueba_Sincronizacion.html','./manifest.webmanifest','./icon-192.svg','./icon-512.svg'];
 
 self.addEventListener('install',e=>{
   self.skipWaiting();
